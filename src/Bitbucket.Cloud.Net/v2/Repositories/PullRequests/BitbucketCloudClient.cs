@@ -34,11 +34,11 @@ namespace Bitbucket.Cloud.Net
 			return await HandleResponseAsync<PullRequest>(response).ConfigureAwait(false);
 		}
 
-		public async Task<IEnumerable<PullRequest>> GetRepositoryPullRequestsAsync(string workspaceId, string repositorySlug, int? maxPages = null, string q = null)
+		public async Task<IEnumerable<PullRequest>> GetRepositoryPullRequestsAsync(string workspaceId, string repositorySlug, int? maxPages = null, string state = null)
 		{
 			var queryParamValues = new Dictionary<string, object>
 			{
-				[nameof(q)] = q
+				[nameof(state)] = state
 			};
 
 			return await GetPagedResultsAsync(maxPages, queryParamValues, async qpv =>
