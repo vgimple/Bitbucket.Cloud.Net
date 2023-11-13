@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Bitbucket.Cloud.Net.Common.Models;
@@ -34,7 +35,7 @@ namespace Bitbucket.Cloud.Net
 			return await HandleResponseAsync<PullRequest>(response).ConfigureAwait(false);
 		}
 
-		public async Task<IEnumerable<PullRequest>> GetRepositoryPullRequestsAsync(string workspaceId, string repositorySlug, int? maxPages = null, string state = null)
+		public async Task<IEnumerable<PullRequest>> GetRepositoryPullRequestsAsync(string workspaceId, string repositorySlug, int? maxPages = null, string state = null, Func<PullRequest, bool>? stopCheck = null)
 		{
 			var queryParamValues = new Dictionary<string, object>
 			{
@@ -45,7 +46,8 @@ namespace Bitbucket.Cloud.Net
 					await GetPullRequestsUrl(workspaceId, repositorySlug)
 						.SetQueryParams(qpv)
 						.GetJsonAsync<PagedResults<PullRequest>>()
-						.ConfigureAwait(false))
+						.ConfigureAwait(false),
+						stopCheck)
 				.ConfigureAwait(false);
 		}
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Bitbucket.Cloud.Net.Common;
@@ -85,7 +86,7 @@ namespace Bitbucket.Cloud.Net
 			return await ReadResponseContentAsync(responseMessage).ConfigureAwait(false);
 		}
 
-		private async Task<IEnumerable<T>> GetPagedResultsAsync<T>(int? maxPages, IDictionary<string, object> queryParamValues, Func<IDictionary<string, object>, Task<PagedResults<T>>> selector)
+		private async Task<IEnumerable<T>> GetPagedResultsAsync<T>(int? maxPages, IDictionary<string, object> queryParamValues, Func<IDictionary<string, object>, Task<PagedResults<T>>> selector, Func<T, bool>? stopCheck = null)
 		{
 			var results = new List<T>();
 			bool isLastPage = false;
@@ -98,6 +99,10 @@ namespace Bitbucket.Cloud.Net
 				results.AddRange(selectorResults.Values);
 
 				isLastPage = selectorResults.Next == null || selectorResults.Size == numPages * selectorResults.PageLen;
+				if ((stopCheck != null) && (selectorResults.Values.Count() > 0))
+					if (stopCheck(selectorResults.Values.Last()))
+						isLastPage = true;
+
 				if (!isLastPage)
 				{
 					queryParamValues["page"] = selectorResults.Page + 1;
